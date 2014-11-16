@@ -1,10 +1,10 @@
 ;;;
-;;; Test gis_hubeny
+;;; Test gis.hubeny
 ;;;
 
 (use gauche.test)
 
-(test-start "gis_hubeny")
+(test-start "gis.hubeny")
 (use gis.hubeny)
 (test-module 'gis.hubeny)
 
