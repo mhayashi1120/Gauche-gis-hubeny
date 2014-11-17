@@ -2,14 +2,25 @@
   (use gauche.parameter)
   (use math.const)
   (export
-   distance-between)
-  )
+   ;; Class
+   <gis-point>
+
+   ;; Parameter
+   default-geodesic-datum
+
+   ;; Method
+   distance-between))
 (select-module gis.hubeny)
 
 ;; http://yamadarake.jp/trdi/report000001.html
 
+;; BESSEL / GRS80 / WGS84
 (define default-geodesic-datum
   (make-parameter 'GRS80))
+
+;; METER / MILE
+(define distance-unit
+  (make-parameter 'METER))
 
 (define-constant BESSEL_A 6377397.155)
 (define-constant BESSEL_E2 0.00667436061028297)
@@ -26,21 +37,27 @@
 (define (degree->radian deg)
   (* deg (/ pi 180.0)))
 
-;; TODO export?
+(define (meter->mile i)
+  (/ i 1609.344))
+
+(define (mile->meter i)
+  (* 1609.344 i))
+
 (define-class <gis-point> ()
   ((lat :init-keyword :lat)
    (long :init-keyword :long)))
 
-;; TODO unit of distance (mile? km?)
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
 
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>)
                                  (type <symbol>))
   (define (parse-lat/long s)
-    (if-let1 m (#/^([0-9.]+)[ \t]*,[ \t]*([0-9.]+)$/ s)
-      (values (string->number (m 1)) (string->number (m 2)))
-      (errorf "Not matched ~a" s)))
+    (cond
+     [(#/^([0-9.]+)[ \t]*,[ \t]*([0-9.]+)$/ s) =>
+      (^m (values (string->number (m 1)) (string->number (m 2))))]
+     [else
+      (errorf "Not matched ~a" s)]))
   
   (receive (lat1 long1) (parse-lat/long lat/long1)
     (receive (lat2 long2) (parse-lat/long lat/long2)
@@ -62,16 +79,21 @@
            [dx (degree->radian (- long1 long2))]
            [sin0 (sin my)]
            [w (sqrt (- 1.0 (* e2 sin0 sin0)))]
-           [m (/ mnum (* w w w))]
+           [m (/ mnum (expt w 3))]
            [n (/ a w)]
            [dym (* dy m)]
-           [dxncos (* dx n (cos my))])
-      (sqrt (+ (expt dym 2) (expt dxncos 2))))))
+           [dxncos (* dx n (cos my))]
+           [meter (sqrt (+ (expt dym 2) (expt dxncos 2)))])
+      (ecase (distance-unit)
+        ['METER
+         meter]
+        ['MILE
+         (meter->mile meter)]))))
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
-  (distance-between (make <gis-point> :lat lat1 :long long1)
-                    (make <gis-point> :lat lat2 :long long2)))
+  (distance-between lat1 long2 lat2 long2
+                    (default-geodesic-datum)))
 
 (define-method distance-between ((p1 <gis-point>) (p2 <gis-point>))
   (distance-between p1 p2 (default-geodesic-datum)))
