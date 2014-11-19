@@ -2,9 +2,6 @@
   (use gauche.parameter)
   (use math.const)
   (export
-   ;; Class
-   <gis-point>
-
    ;; Parameter
    default-geodesic-datum
 
@@ -42,10 +39,6 @@
 
 (define (mile->meter i)
   (* 1609.344 i))
-
-(define-class <gis-point> ()
-  ((lat :init-keyword :lat)
-   (long :init-keyword :long)))
 
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
@@ -92,13 +85,6 @@
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
-  (distance-between lat1 long2 lat2 long2
+  (distance-between lat1 long1 lat2 long2
                     (default-geodesic-datum)))
-
-(define-method distance-between ((p1 <gis-point>) (p2 <gis-point>))
-  (distance-between p1 p2 (default-geodesic-datum)))
-
-(define-method distance-between ((p1 <gis-point>) (p2 <gis-point>) (type <symbol>))
-  (distance-between (~ p1 'lat) (~ p1 'long)
-                    (~ p2 'lat) (~ p2 'long) type))
 
