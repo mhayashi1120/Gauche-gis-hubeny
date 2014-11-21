@@ -15,10 +15,6 @@
 (define default-geodesic-datum
   (make-parameter 'GRS80))
 
-;; METER / MILE
-(define distance-unit
-  (make-parameter 'METER))
-
 (define-constant BESSEL_A 6377397.155)
 (define-constant BESSEL_E2 0.00667436061028297)
 (define-constant BESSEL_MNUM 6334832.10663254)
@@ -33,12 +29,6 @@
 
 (define (degree->radian deg)
   (* deg (/ pi 180.0)))
-
-(define (meter->mile i)
-  (/ i 1609.344))
-
-(define (mile->meter i)
-  (* 1609.344 i))
 
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
@@ -77,11 +67,7 @@
            [dym (* dy m)]
            [dxncos (* dx n (cos my))]
            [meter (sqrt (+ (expt dym 2) (expt dxncos 2)))])
-      (ecase (distance-unit)
-        ['METER
-         meter]
-        ['MILE
-         (meter->mile meter)]))))
+      meter)))
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
