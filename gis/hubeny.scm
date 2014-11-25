@@ -33,6 +33,7 @@
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
 
+;; e.g. lat/long "36.1030203, 139.40202"
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>)
                                  (type <symbol>))
   (define (parse-lat/long s)
