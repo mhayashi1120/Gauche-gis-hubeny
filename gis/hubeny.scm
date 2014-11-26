@@ -1,4 +1,5 @@
 (define-module gis.hubeny
+  (use util.match)
   (use gauche.parameter)
   (use math.const)
   (export
@@ -11,21 +12,27 @@
 
 ;; http://yamadarake.jp/trdi/report000001.html
 
+;; (define (_compute-constants a b)
+;;   (let* ((e (sqrt (/ (- (expt a 2) (expt b 2))
+;;                      (expt a 2))))
+;;          (e^2 (expt e 2))
+;;          (M-numerator (* a (- 1 e^2))))
+;;     (list a e^2 M-numerator)))
+
 ;; BESSEL / GRS80 / WGS84
 (define default-geodesic-datum
-  (make-parameter 'GRS80))
+  (make-parameter 'WGS84))
+;; (_compute-constants 6377397.155 6356079.0)
+(define-constant BESSEL_CONSTANTS
+  '(6377397.155 0.00667436061028297 6334832.10663254))
 
-(define-constant BESSEL_A 6377397.155)
-(define-constant BESSEL_E2 0.00667436061028297)
-(define-constant BESSEL_MNUM 6334832.10663254)
+;; (_compute-constants 6378137.0 6356752.314140)
+(define-constant GRS80_CONSTANTS
+  '(6378137.0 0.00669438002301188 6335439.32708317))
 
-(define-constant GRS80_A 6378137.000)
-(define-constant GRS80_E2 0.00669438002301188)
-(define-constant GRS80_MNUM 6335439.32708317)
-
-(define-constant WGS84_A 6378137.000)
-(define-constant WGS84_E2 0.00669437999019758)
-(define-constant WGS84_MNUM 6335439.32729246)
+;; (_compute-constants 6378137.0 6356752.314245)
+(define-constant WGS84_CONSTANTS
+  '(6378137.0 0.00669437999019758 6335439.32729246))
 
 (define (degree->radian deg)
   (* deg (/ pi 180.0)))
@@ -50,23 +57,23 @@
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>)
                                  (type <symbol>))
-  (receive (a e2 mnum)
-      (ecase type
-        ['BESSEL
-         (values BESSEL_A BESSEL_E2 BESSEL_MNUM)]
-        ['GRS80
-         (values GRS80_A GRS80_E2 GRS80_MNUM)]
-        ['WGS84
-         (values WGS84_A WGS84_E2 WGS84_MNUM)])
+  (match-let1 (a e^2 M-num)
+	  (ecase type
+		['BESSEL
+		 BESSEL_CONSTANTS]
+		['GRS80
+		 GRS80_CONSTANTS]
+		['WGS84
+		 WGS84_CONSTANTS])
     (let* ([my (degree->radian (/ (+ lat1 lat2) 2.0))]
            [dy (degree->radian (- lat1 lat2))]
            [dx (degree->radian (- long1 long2))]
            [sin0 (sin my)]
-           [w (sqrt (- 1.0 (* e2 sin0 sin0)))]
-           [m (/ mnum (expt w 3))]
-           [n (/ a w)]
-           [dym (* dy m)]
-           [dxncos (* dx n (cos my))]
+           [w (sqrt (- 1.0 (* e^2 sin0 sin0)))]
+           [M (/ M-num (expt w 3))]
+           [N (/ a w)]
+           [dym (* dy M)]
+           [dxncos (* dx N (cos my))]
            [meter (sqrt (+ (expt dym 2) (expt dxncos 2)))])
       meter)))
 
