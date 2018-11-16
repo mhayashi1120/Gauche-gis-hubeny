@@ -12,6 +12,19 @@
 
 ;; http://yamadarake.jp/trdi/report000001.html
 
+;; d = sqrt( (Dy * M)^2 + (Dx * N * cosμy)^2 )
+
+;; d = METRE
+;; ( x1, y1 ) = location1
+;; ( x2, y2 ) = location2
+;; Dy = y1 - y2 (diff latitude)
+;; Dx = x1 - x2 (diff longitude)
+;; μy = ( y1 + y2 ) / 2 (average of latitude)
+;; M = (a * ( 1 - e^2 ) ) / W^3
+;; N = a / W
+;; W = sqrt ( 1 - ( e^2 * (sinμy)^2 ) )
+;; e = sqrt ( ( a^2 - b^2 ) / a^2)
+
 ;; BESSEL / GRS80 / WGS84
 (define default-geodesic-datum
   (make-parameter 'WGS84))
@@ -56,17 +69,17 @@
 		 GRS80_CONSTANTS]
 		['WGS84
 		 WGS84_CONSTANTS])
-    (let* ([my (degree->radian (/ (+ lat1 lat2) 2.0))]
+    (let* ([MUy (degree->radian (/ (+ lat1 lat2) 2.0))]
            [dy (degree->radian (- lat1 lat2))]
            [dx (degree->radian (- long1 long2))]
-           [sin0 (sin my)]
+           [sin0 (sin MUy)]
            [w (sqrt (- 1.0 (* e^2 sin0 sin0)))]
            [M (/ M-num (expt w 3))]
            [N (/ a w)]
            [dym (* dy M)]
-           [dxncos (* dx N (cos my))]
-           [meter (sqrt (+ (expt dym 2) (expt dxncos 2)))])
-      meter)))
+           [dxncos (* dx N (cos MUy))]
+           [metre (sqrt (+ (expt dym 2) (expt dxncos 2)))])
+      metre)))
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
