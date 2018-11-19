@@ -7,7 +7,8 @@
    default-geodesic-datum
 
    ;; Method
-   distance-between))
+   distance-between
+   longitude-range latitude-range))
 (select-module gis.hubeny)
 
 ;; http://yamadarake.jp/trdi/report000001.html
@@ -25,6 +26,8 @@
 ;; W = sqrt ( 1 - ( e^2 * (sinμy)^2 ) )
 ;; e = sqrt ( ( a^2 - b^2 ) / a^2)
 
+;; μ =: MU
+
 ;; BESSEL / GRS80 / WGS84
 (define default-geodesic-datum
   (make-parameter 'WGS84))
@@ -38,8 +41,21 @@
 (define-constant WGS84_CONSTANTS
   '@WGS84_CONSTANTS@)
 
+(define (define-constants type)
+  (apply values
+         (ecase type
+	       ['BESSEL BESSEL_CONSTANTS]
+	       ['GRS80 GRS80_CONSTANTS]
+	       ['WGS84 WGS84_CONSTANTS])))
+
 (define (degree->radian deg)
-  (* deg (/ pi 180.0)))
+  (* deg pi/180))
+
+(define (radian->degree radian)
+  (* radian 180/pi))
+
+;; TODO remove
+;; (radian->degree (degree->radian 180))
 
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
@@ -61,28 +77,54 @@
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>)
                                  (type <symbol>))
-  (match-let1 (a e^2 M-num)
-	  (ecase type
-		['BESSEL
-		 BESSEL_CONSTANTS]
-		['GRS80
-		 GRS80_CONSTANTS]
-		['WGS84
-		 WGS84_CONSTANTS])
-    (let* ([MUy (degree->radian (/ (+ lat1 lat2) 2.0))]
-           [dy (degree->radian (- lat1 lat2))]
-           [dx (degree->radian (- long1 long2))]
-           [sin0 (sin MUy)]
-           [w (sqrt (- 1.0 (* e^2 sin0 sin0)))]
-           [M (/ M-num (expt w 3))]
-           [N (/ a w)]
-           [dym (* dy M)]
-           [dxncos (* dx N (cos MUy))]
-           [metre (sqrt (+ (expt dym 2) (expt dxncos 2)))])
-      metre)))
+
+  (define-values (M Ncos) (compute-ellipse (/ (+ lat1 lat2) 2.0)))
+
+  (let* ([Dy (degree->radian (- lat1 lat2))]
+         [Dx (degree->radian (- long1 long2))]
+         [DyM (* Dy M)]
+         [DxNcos (* Dx Ncos)]
+         [metre (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
+    metre))
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
   (distance-between lat1 long1 lat2 long2
                     (default-geodesic-datum)))
+
+(define (compute-ellipse lat)
+  (define-values (a e^2 M-num) (define-constants 'WGS84))
+
+  (let* ([MUy (degree->radian lat)]
+         [sinMUy^2 (expt (sin MUy) 2)]
+         [W (sqrt (- 1.0 (* e^2 sinMUy^2)))]
+         [M (/ M-num (expt W 3))]
+         [N (/ a W)]
+         [Ncos (* N (cos MUy))])
+    (values M Ncos)))
+
+;; TODO These methods consider to use search range of lat,long set.
+
+(define (latitude-range d lat long)
+  (define-values (M Ncos) (compute-ellipse lat))
+
+  (let* ([Dx 0.0]
+         [Dy (/ (sqrt (-  (expt d 2) (expt (* Dx Ncos) 2)))  M)]
+         [yDegree (radian->degree Dy)])
+    ;; TODO mod
+    (values (- lat yDegree) (+ lat yDegree))))
+
+(define (longitude-range d lat long)
+  (define-values (M Ncos) (compute-ellipse lat))
+
+  (let* ([Dy 0.0]
+         [DyM (* Dy M)]
+         [Dx (/ (sqrt (- (expt d 2) (expt DyM 2))) Ncos)]
+         [xDegree (radian->degree Dx)])
+    ;; TODO mod
+    (values (- long xDegree) (+ long xDegree))))
+
+;; (modulo -150 180)
+;; (remainder -179 180)
+;; (remainder 179 180)
 
