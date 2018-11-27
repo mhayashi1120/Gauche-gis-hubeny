@@ -8,6 +8,7 @@
 
    ;; Method
    distance-between
+   longitude-limit latitude-limit
    longitude-range latitude-range))
 (select-module gis.hubeny)
 
@@ -31,6 +32,11 @@
 ;; N = a / W
 ;; W = sqrt ( 1 - ( e^2 * (sinμy)^2 ) )
 ;; e = sqrt ( ( a^2 - b^2 ) / a^2)
+
+;; Transform formula:
+
+;; Dy = ( sqrt ( d^2 - ( Dx * N * cosμy )^2 ) ) / M
+;; Dx = sqrt ( ( d^2 - ( Dy * M )^2 ) / ( N * cosμy ))
 
 ;; μ =: MU
 
@@ -67,7 +73,7 @@
 
 (define (parse-lat/long s)
   (cond
-   [(#/^([-+]?[0-9.]+)[ \t]*,[ \t]*([-+]?[0-9.]+)$/ s) =>
+   [(#/^([-+]?[0-9.]+)[\s\t]*,[\s\t]*([-+]?[0-9.]+)$/ s) =>
     (^m (values (string->number (m 1)) (string->number (m 2))))]
    [else
     (errorf "Not matched ~a" s)]))
@@ -80,16 +86,14 @@
   (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
 
 ;; e.g. lat/long "36.1030203, 139.40202"
-(define-method distance-between ((lat/long1 <string>) (lat/long2 <string>)
-                                 (type <symbol>))
+(define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
 
   (receive (lat1 long1) (parse-lat/long lat/long1)
     (receive (lat2 long2) (parse-lat/long lat/long2)
-      (distance-between lat1 long1 lat2 long2 type))))
+      (distance-between lat1 long1 lat2 long2))))
 
 (define-method distance-between ((lat1 <number>) (long1 <number>)
-                                 (lat2 <number>) (long2 <number>)
-                                 (type <symbol>))
+                                 (lat2 <number>) (long2 <number>))
 
   (define-values (M Ncos) (compute-ellipse (/ (+ lat1 lat2) 2.0)))
 
@@ -100,29 +104,38 @@
          [metre (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
     metre))
 
-(define-method distance-between ((lat1 <number>) (long1 <number>)
-                                 (lat2 <number>) (long2 <number>))
-  (distance-between lat1 long1 lat2 long2
-                    (default-geodesic-datum)))
+;; These methods consider to use search range of lat,long set.
 
-;; TODO These methods consider to use search range of lat,long set.
+(define-method distance-limit ((d <number>) (lat/long <string>))
+  (receive (lat long) (parse-lat/long lat/long)
+    (distance-limit d lat long)))
 
-(define-method latitude-range ((d <number>) (lat <number>) (long <number>))
+(define-method distance-limit ((d <number>) (lat <number>) (long <number>))
+  (values (latitude-limit d lat long) (longitude-limit d lat long)))
+
+(define-method latitude-limit ((d <number>) (lat <number>) (long <number>))
   (define-values (M Ncos) (compute-ellipse lat))
 
   (let* ([Dx 0.0]
-         [Dy (/ (sqrt (-  (expt d 2) (expt (* Dx Ncos) 2))) M)]
-         [yDegree (radian->degree Dy)])
-    ;; TODO mod
-    (values (- lat yDegree) (+ lat yDegree))))
+         [Dy (/ (sqrt (-  (expt d 2) (expt (* Dx Ncos) 2))) M)])
 
-(define-method longitude-range ((d <number>) (lat <number>) (long <number>))
+    (radian->degree Dy)))
+
+(define-method longitude-limit ((d <number>) (lat <number>) (long <number>))
   (define-values (M Ncos) (compute-ellipse lat))
 
   (let* ([Dy 0.0]
-         [DyM (* Dy M)]
-         [Dx (/ (sqrt (- (expt d 2) (expt DyM 2))) Ncos)]
-         [xDegree (radian->degree Dx)])
-    ;; TODO mod
+         [Dx (/ (sqrt (- (expt d 2) (expt (* Dy M) 2))) Ncos)])
+
+    (radian->degree Dx)))
+
+;;TODO improve interface. at polar regions
+
+(define-method latitude-range ((d <number>) (lat <number>) (long <number>))
+  (let1 yDegree (latitude-limit d lat long)
+    (values (- lat yDegree) (+ lat yDegree))))
+
+(define-method longitude-range ((d <number>) (lat <number>) (long <number>))
+  (let1 xDegree (longitude-limit d lat long)
     (values (- long xDegree) (+ long xDegree))))
 
