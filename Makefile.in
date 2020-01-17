@@ -26,10 +26,11 @@ LOCAL_PATHS = "@LOCAL_PATHS@"
 PACKAGE   = Gauche-gis-hubeny
 
 ARCHFILES = 
-SCMFILES  = $(srcdir)/gis/hubeny.scm
+SCMFILES  = $(GENERATED_SCMFILES)
+GENERATED_SCMFILES  = $(srcdir)/gis/hubeny.scm
 HEADERS   =
 
-TARGET    = $(ARCHFILES)
+TARGET    = $(SCMFILES) $(ARCHFILES)
 GENERATED =
 CONFIG_GENERATED = Makefile config.cache config.log config.status \
 		   configure.lineno autom4te*.cache $(PACKAGE).gpd
@@ -41,6 +42,9 @@ GAUCHE_PKGARCHDIR = "$(DESTDIR)@GAUCHE_PKGARCHDIR@"
 gis_hubeny_SRCS =
 
 all : $(TARGET)
+
+gis/hubeny.scm:
+	$(MAKE) -C gis all
 
 check : all
 	@rm -f test.log
@@ -66,5 +70,6 @@ distclean : clean
 	rm -rf $(CONFIG_GENERATED)
 
 maintainer-clean : clean
+	rm -f $(GENERATED_SCMFILES)
 	rm -rf $(CONFIG_GENERATED)  VERSION
 
