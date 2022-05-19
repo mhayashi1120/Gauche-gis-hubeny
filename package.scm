@@ -36,7 +36,7 @@ between 2 latitude/longitude by HUBENY formula."
 
   ;; List licenses
   ;; e.g. ("BSD")
-  :licenses ()
+  :licenses ("MIT")
 
   ;; Homepage URL, if any.
   ; :homepage "http://example.com/Gauche-gis-hubeny/"
