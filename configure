@@ -21,6 +21,19 @@
 ;; Output
 (cf-output-default)
 
+(define (compute-constants a b)
+  (let* ((e (sqrt (/ (- (expt a 2) (expt b 2))
+                     (expt a 2))))
+         (e^2 (expt e 2))
+         (M-numerator (* a (- 1 e^2))))
+    (list a e^2 M-numerator)))
+
+(cf-subst 'BESSEL_CONSTANTS (x->string (compute-constants 6377397.155 6356079.0)))
+(cf-subst 'GRS80_CONSTANTS (x->string (compute-constants 6378137.0 6356752.314140)))
+(cf-subst 'WGS84_CONSTANTS (x->string (compute-constants 6378137.0 6356752.314245)))
+
+(cf-output "gis/hubeny.scm")
+
 ;; Local variables:
 ;; mode: scheme
 ;; end:
