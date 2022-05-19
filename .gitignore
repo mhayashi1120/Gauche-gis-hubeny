@@ -1,5 +1,5 @@
-test.log
-config.log
-Makefile
-*.gpd
-VERSION
+/Makefile
+/*.gpd
+/VERSION
+
+*.log
