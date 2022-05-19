@@ -5,9 +5,9 @@
 (define (main args)
   ;; dummy
   (cf-init "" "" "")
-  (cf-subst 'BESSEL_CONSTANTS (compute-constants 6377397.155 6356079.0))
-  (cf-subst 'GRS80_CONSTANTS (compute-constants 6378137.0 6356752.314140))
-  (cf-subst 'WGS84_CONSTANTS (compute-constants 6378137.0 6356752.314245))
+  (cf-subst 'BESSEL_CONSTANTS (x->string (compute-constants 6377397.155 6356079.0)))
+  (cf-subst 'GRS80_CONSTANTS (x->string (compute-constants 6378137.0 6356752.314140)))
+  (cf-subst 'WGS84_CONSTANTS (x->string (compute-constants 6378137.0 6356752.314245)))
   (cf-output "hubeny.scm")
   0)
 

@@ -1,4 +1,4 @@
-GOSH           = "/usr/local/bin/gosh"
+GOSH           = "@GOSH@"
 
 SCMFILES = hubeny.scm
 

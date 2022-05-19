@@ -31,7 +31,7 @@ GENERATED_SCMFILES  = $(srcdir)/gis/hubeny.scm
 HEADERS   =
 
 TARGET    = $(SCMFILES) $(ARCHFILES)
-GENERATED =
+CONFIG_GENERATED = 
 CONFIG_GENERATED = Makefile config.cache config.log config.status \
 		   configure.lineno autom4te*.cache $(PACKAGE).gpd
 
@@ -64,7 +64,7 @@ uninstall :
 
 clean :
 	$(GAUCHE_PACKAGE) compile --clean gis_hubeny $(gis_hubeny_SRCS)
-	rm -rf core $(TARGET) $(GENERATED) *~ test.log so_locations
+	rm -rf core $(TARGET) $(CONFIG_GENERATED) *~ test.log so_locations
 
 distclean : clean
 	rm -rf $(CONFIG_GENERATED)
@@ -72,4 +72,3 @@ distclean : clean
 maintainer-clean : clean
 	rm -f $(GENERATED_SCMFILES)
 	rm -rf $(CONFIG_GENERATED)  VERSION
-
