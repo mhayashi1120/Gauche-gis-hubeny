@@ -134,7 +134,8 @@
 ;;;
 
 ;; ##
-;; - {GEO1, GEO2} : <string> (e.g. "36.1030203, 139.40202")
+;; - {GEO1, GEO2} : <string> | (LAT:<number . LNG:<number>)
+;;       (e.g. "36.1030203, 139.40202" (36.1030203 . 139.40202))
 ;; -> <number>
 (define (hubeny-distance geo1 geo2)
   (define (coerce-lat&lng g)
@@ -156,6 +157,11 @@
 (define (hubeny-distance* lat1 lng1 lat2 lng2)
   (define-values (M Ncos) (compute-ellipse (/ (+ lat1 lat2) 2.0)))
 
+  (assume-type lat1 <number>)
+  (assume-type lng1 <number>)
+  (assume-type lat2 <number>)
+  (assume-type lng2 <number>)
+
   (let* ([Dy (degree->radian (- lat1 lat2))]
          [Dx (degree->radian (- lng1 lng2))]
          [DyM (* Dy M)]
@@ -176,7 +182,7 @@
 ;; - {LAT, LNG} : <number>
 ;; -> [LAT:<number>, LNG:<number>]
 (define (hubeny-limit* meter lat lng)
-  (values (hubeny-lat-limit meter lat) 
+  (values (hubeny-lat-limit meter lat)
           (hubeny-lng-limit meter lat)))
 
 ;; ## This interface still testing
@@ -185,6 +191,9 @@
 ;; -> LATITUDE:<number>
 (define (hubeny-lat-limit meter lat)
   (define-values (M Ncos) (compute-ellipse lat))
+
+  (assume-type meter <number>)
+  (assume-type lat <number>)
 
   (let* ([Dx 0.0]
          [Dy (/ (sqrt (-  (expt meter 2) (expt (* Dx Ncos) 2))) M)])
@@ -196,6 +205,9 @@
 (define (hubeny-lng-limit meter lat)
   (define-values (M Ncos) (compute-ellipse lat))
 
+  (assume-type meter <number>)
+  (assume-type lat <number>)
+
   (let* ([Dy 0.0]
          [Dx (/ (sqrt (- (expt meter 2) (expt (* Dy M) 2))) Ncos)])
 
@@ -204,11 +216,11 @@
 ;; ## This interface still testing
 ;; -> [LAT-MIN:<number>, LAT-MAX:<number>]
 (define (hubeny-lat-range meter lat lng)
-  (let1 yDegree (latitude-limit meter lat lng)
+  (let1 yDegree (hubeny-lat-limit meter lat)
     (values (- lat yDegree) (+ lat yDegree))))
 
 ;; ## This interface still testing
 ;; -> [LNG-MIN:<number>, LNG-MAX:<number>]
 (define (hubeny-lng-range meter lat lng)
-  (let1 xDegree (longitude-limit meter lat lng)
+  (let1 xDegree (hubeny-lng-limit meter lat)
     (values (- lng xDegree) (+ lng xDegree))))
