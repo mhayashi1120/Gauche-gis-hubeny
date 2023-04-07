@@ -25,13 +25,13 @@ LOCAL_PATHS = "@LOCAL_PATHS@"
 # Module-specific stuff
 PACKAGE   = Gauche-gis-hubeny
 
-ARCHFILES = 
+ARCHFILES =
 SCMFILES  = $(GENERATED_SCMFILES)
 GENERATED_SCMFILES  = $(srcdir)/gis/hubeny.scm
 HEADERS   =
 
 TARGET    = $(SCMFILES) $(ARCHFILES)
-CONFIG_GENERATED = 
+CONFIG_GENERATED =
 CONFIG_GENERATED = Makefile config.cache config.log config.status \
 		   configure.lineno autom4te*.cache $(PACKAGE).gpd \
 			gis/config.log
@@ -49,7 +49,7 @@ gis/hubeny.scm:
 
 check : all
 	@rm -f test.log
-	$(GOSH) -I. -I$(srcdir) $(srcdir)/test.scm > test.log
+	$(GOSH) -I$(srcdir) $(srcdir)/test.scm > test.log
 
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)

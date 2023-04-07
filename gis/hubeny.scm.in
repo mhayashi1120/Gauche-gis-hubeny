@@ -5,7 +5,14 @@
   (export
    ;; Parameter
    default-geodesic-datum
-
+   )
+  (export
+   hubeny-distance hubeny-distance*
+   hubeny-limit hubeny-limit*
+   hubeny-lat-limit hubeny-lng-limit
+   hubeny-lat-range hubeny-lng-range)
+  ;; Deprecating interface
+  (export
    ;; Method
    distance-between
    longitude-limit latitude-limit
@@ -79,63 +86,129 @@
     (errorf "Not matched ~a" s)]))
 
 ;;;
-;;; API
+;;; # Deprecating API
 ;;;
 
-(define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
-  (distance-between lat/long1 lat/long2 (default-geodesic-datum)))
-
+;; ## Deprecating interface should use [=hubeny-distance]()
 ;; e.g. lat/long "36.1030203, 139.40202"
+;; -> <number>
 (define-method distance-between ((lat/long1 <string>) (lat/long2 <string>))
 
-  (receive (lat1 long1) (parse-lat/long lat/long1)
-    (receive (lat2 long2) (parse-lat/long lat/long2)
-      (distance-between lat1 long1 lat2 long2))))
+  (hubeny-distance lat/long1 lat/long2))
 
+;; ## Deprecating interface should use [=hubeny-distance*]()
 (define-method distance-between ((lat1 <number>) (long1 <number>)
                                  (lat2 <number>) (long2 <number>))
+  (hubeny-distance* lat1 long1 lat2 long2))
 
+;; These methods consider to use search range of lat,long set.
+
+;; ## Deprecating interface should use [=hubeny-limit]()
+(define-method distance-limit ((d <number>) (lat/long <string>))
+  (hubeny-limit d lat/long))
+
+;; ## Deprecating interface should use [=hubeny-limit*]()
+(define-method distance-limit ((d <number>) (lat <number>) (long <number>))
+  (hubeny-limit* d lat long))
+
+;; ## Deprecating interface should use [=hubeny-lat-limit]()
+(define-method latitude-limit ((d <number>) (lat <number>) (_ <number>))
+  (hubeny-lat-limit d lat))
+
+;; ## Deprecating interface should use TODO [=hubeny-lng-limit]()
+(define-method longitude-limit ((d <number>) (lat <number>) (_ <number>))
+  (hubeny-lng-limit d lat))
+
+;;TODO improve interface. at polar regions
+
+;; ## Deprecating interface should use [=hubeny-lat-range]()
+(define-method latitude-range ((d <number>) (lat <number>) (long <number>))
+  (hubeny-lat-range d lat long))
+
+;; ## Deprecating interface should use TODO [=hubeny-lng-range]()
+(define-method longitude-range ((d <number>) (lat <number>) (long <number>))
+  (hubeny-lng-range d lat long))
+
+;;;
+;;; # API
+;;;
+
+;; ##
+;; - {GEO1, GEO2} : <string> (e.g. "36.1030203, 139.40202")
+;; -> <number>
+(define (hubeny-distance geo1 geo2)
+  (define (coerce-lat&lng g)
+    (match g
+      [(? string? s)
+       (parse-lat/long s)]
+      [((? integer? lat) . (? integer? lng))
+       (values lat lng)]
+      [_
+       (error "Not a suported geo" g)]))
+
+  (receive (lat1 long1) (coerce-lat&lng geo1)
+    (receive (lat2 long2) (coerce-lat&lng geo2)
+      (hubeny-distance* lat1 long1 lat2 long2))))
+
+;; ##
+;; - {LAT1, LNG1, LAT2, LNG2} : <number>
+;; -> <number>
+(define (hubeny-distance* lat1 lng1 lat2 lng2)
   (define-values (M Ncos) (compute-ellipse (/ (+ lat1 lat2) 2.0)))
 
   (let* ([Dy (degree->radian (- lat1 lat2))]
-         [Dx (degree->radian (- long1 long2))]
+         [Dx (degree->radian (- lng1 lng2))]
          [DyM (* Dy M)]
          [DxNcos (* Dx Ncos)]
          [metre (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
     metre))
 
-;; These methods consider to use search range of lat,long set.
+;; ##
+;; - METER : <number>
+;; - GEO : <string>
+;; -> <number>
+(define (hubeny-limit meter geo)
+  (receive (lat long) (parse-lat/long geo)
+    (hubeny-limit* meter lat long)))
 
-(define-method distance-limit ((d <number>) (lat/long <string>))
-  (receive (lat long) (parse-lat/long lat/long)
-    (distance-limit d lat long)))
+;; ##
+;; - METER : <number>
+;; - {LAT, LNG} : <number>
+;; -> [LAT:<number>, LNG:<number>]
+(define (hubeny-limit* meter lat lng)
+  (values (hubeny-lat-limit meter lat) 
+          (hubeny-lng-limit meter lat)))
 
-(define-method distance-limit ((d <number>) (lat <number>) (long <number>))
-  (values (latitude-limit d lat long) (longitude-limit d lat long)))
-
-(define-method latitude-limit ((d <number>) (lat <number>) (long <number>))
+;; ## This interface still testing
+;; - METER : <number>
+;; - {LAT, LNG} : <number>
+;; -> LATITUDE:<number>
+(define (hubeny-lat-limit meter lat)
   (define-values (M Ncos) (compute-ellipse lat))
 
   (let* ([Dx 0.0]
-         [Dy (/ (sqrt (-  (expt d 2) (expt (* Dx Ncos) 2))) M)])
+         [Dy (/ (sqrt (-  (expt meter 2) (expt (* Dx Ncos) 2))) M)])
 
     (radian->degree Dy)))
 
-(define-method longitude-limit ((d <number>) (lat <number>) (long <number>))
+;; ## This interface still testing
+;; -> LONGITUDE:<number>
+(define (hubeny-lng-limit meter lat)
   (define-values (M Ncos) (compute-ellipse lat))
 
   (let* ([Dy 0.0]
-         [Dx (/ (sqrt (- (expt d 2) (expt (* Dy M) 2))) Ncos)])
+         [Dx (/ (sqrt (- (expt meter 2) (expt (* Dy M) 2))) Ncos)])
 
     (radian->degree Dx)))
 
-;;TODO improve interface. at polar regions
-
-(define-method latitude-range ((d <number>) (lat <number>) (long <number>))
-  (let1 yDegree (latitude-limit d lat long)
+;; ## This interface still testing
+;; -> [LAT-MIN:<number>, LAT-MAX:<number>]
+(define (hubeny-lat-range meter lat lng)
+  (let1 yDegree (latitude-limit meter lat lng)
     (values (- lat yDegree) (+ lat yDegree))))
 
-(define-method longitude-range ((d <number>) (lat <number>) (long <number>))
-  (let1 xDegree (longitude-limit d lat long)
-    (values (- long xDegree) (+ long xDegree))))
-
+;; ## This interface still testing
+;; -> [LNG-MIN:<number>, LNG-MAX:<number>]
+(define (hubeny-lng-range meter lat lng)
+  (let1 xDegree (longitude-limit meter lat lng)
+    (values (- lng xDegree) (+ lng xDegree))))

@@ -3,8 +3,8 @@
 ;;
 
 (define-gauche-package "Gauche-gis-hubeny"
-  ;; 
-  :version "1.2.2"
+  ;;
+  :version "1.3.0"
 
   ;; Description of the package.  The first line is used as a short
   ;; summary.
@@ -25,7 +25,7 @@ between 2 latitude/longitude by HUBENY formula."
   :providing-modules (
                       gis.hubeny
                       )
-  
+
   ;; List name and contact info of authors.
   ;; e.g. ("Eva Lu Ator <eval@example.com>"
   ;;       "Alyssa P. Hacker <lisper@example.com>")
@@ -40,9 +40,7 @@ between 2 latitude/longitude by HUBENY formula."
   ;; e.g. ("BSD")
   :licenses ("MIT")
 
-  ;; Homepage URL, if any.
-  ; :homepage "http://example.com/Gauche-gis-hubeny/"
+  :homepage "https://github.com/mhayashi1120/Gauche-gis-hubeny/"
 
-  ;; Repository URL, e.g. github
-  ; :repository "http://example.com/Gauche-gis-hubeny.git"
+  :repository "https://github.com/mhayashi1120/Gauche-gis-hubeny.git"
   )
