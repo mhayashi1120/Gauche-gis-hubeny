@@ -18,15 +18,16 @@ gis.hubeny
 
 ## Function
 
-[Generic Function] distance-between
+[Procedure] hubeny-distance geo1 geo2
 
-[Method] distance-between lat/long1 lat/long2
+geo\* is a compa separated float \<string>
+  e.g. "36.1030203, 139.40202"
 
-   lat/long is a compa separated float strings
-    e.g. "36.1030203, 139.40202"
-  
-[Method] distance-between lat1 long1 lat1 long2
-  
-  lat and long is a float value
+or lat lng pair
+  e.g. (36.1030203 . 139.40202)
+
+[Procedure] hubeny-distance* lat1 lng1 lat2 lng2
+
+lat and lng is a \<real> value
   
 
