@@ -1,6 +1,8 @@
 Gauche-gis-hubeny
 ===================
 
+[![CI](https://github.com/mhayashi1120/Gauche-gis-hubeny/actions/workflows/build.yml/badge.svg)](https://github.com/mhayashi1120/Gauche-gis-hubeny/actions/workflows/build.yml)
+
 Calculate distance between 2 latitude/longitude by HUBENY formula.
 
 This module come from:
