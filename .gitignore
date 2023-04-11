@@ -1,8 +1,8 @@
 /Makefile
-/*.gpd
+/Gauche-gis-hubeny.gpd
 /VERSION
-
-*.log
+/test.log
+/config.log
 
 
 gis/hubeny.scm
