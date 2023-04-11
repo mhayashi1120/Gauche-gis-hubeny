@@ -5,8 +5,14 @@ Gauche-gis-hubeny
 
 Calculate distance between 2 latitude/longitude by HUBENY formula.
 
-This module come from:
+This module originaly come from: (Dead link 2023-04-11)
 http://yamadarake.jp/trdi/report000001.html
+
+Other ref:
+
+- https://www.kashmir3d.com/kash/manual/std_siki.htm
+- https://www.trail-note.net/tech/calc_distance/
+
 
 ## Install
 
