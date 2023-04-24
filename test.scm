@@ -37,11 +37,15 @@
   )
 
 (let* ([Tokyo "35.65500,139.74472"]
+       [Tokyo2 (cons 35.65500 139.74472)]
        [Tsukuba "36.10056,140.09111"]
+       [Tsukuba2 (cons 36.10056 140.09111)]
        [FukuokaDome "33.59532,130.36208"]
        )
   (test* "Distance from Yamadarake1"
          58502.459 (hubeny-distance Tokyo Tsukuba) nearly=?)
+  (test* "Distance from Yamadarake1 2"
+         58502.459 (hubeny-distance Tokyo2 Tsukuba2) nearly=?)
   (test* "Distance from Yamadarake2"
          890233.064 (hubeny-distance Tokyo FukuokaDome) nearly=?)
   (test* "Distance from Yamadarake3 on the Narita Airport runway"
