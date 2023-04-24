@@ -88,4 +88,8 @@
 
 ;; TODO more test. between NorthEast and SouceWest
 
+;; "Wellington Zoo" -41.3200854,174.7831047
+;; "Don pollo Lake" -43.8116059,-176.6013737
+;; -> 758.7km by google map
+
 (test-end :exit-on-failure #t)
