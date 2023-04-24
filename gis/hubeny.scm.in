@@ -10,7 +10,8 @@
    hubeny-distance hubeny-distance*
    hubeny-limit hubeny-limit*
    hubeny-lat-limit hubeny-lng-limit
-   hubeny-lat-range hubeny-lng-range)
+   hubeny-lat-range* hubeny-lng-range*
+   hubeny-range hubeny-range*)
   ;; Deprecating interface
   (export
    ;; Method
@@ -85,6 +86,15 @@
    [else
     (errorf "Not matched ~a" s)]))
 
+(define (coerce-lat&lng g)
+  (match g
+    [(? string? s)
+     (parse-lat/long s)]
+    [((? number? lat) . (? number? lng))
+     (values lat lng)]
+    [_
+     (error "Not a suported geo" g)]))
+
 ;;;
 ;;; # Deprecating API
 ;;;
@@ -117,13 +127,13 @@
 (define-method longitude-limit ((d <number>) (lat <number>) (_ <number>))
   (hubeny-lng-limit d lat))
 
-;; ## Deprecating interface should use [=hubeny-lat-range]()
+;; ## Deprecating interface should use [=hubeny-lat-range*]()
 (define-method latitude-range ((d <number>) (lat <number>) (long <number>))
-  (hubeny-lat-range d lat long))
+  (hubeny-lat-range* d lat long))
 
-;; ## Deprecating interface should use [=hubeny-lng-range]()
+;; ## Deprecating interface should use [=hubeny-lng-range*]()
 (define-method longitude-range ((d <number>) (lat <number>) (long <number>))
-  (hubeny-lng-range d lat long))
+  (hubeny-lng-range* d lat long))
 
 ;;;
 ;;; # API
@@ -134,15 +144,6 @@
 ;;       (e.g. "36.1030203, 139.40202" (36.1030203 . 139.40202))
 ;; -> <number>
 (define (hubeny-distance geo1 geo2)
-  (define (coerce-lat&lng g)
-    (match g
-      [(? string? s)
-       (parse-lat/long s)]
-      [((? number? lat) . (? number? lng))
-       (values lat lng)]
-      [_
-       (error "Not a suported geo" g)]))
-
   (receive (lat1 long1) (coerce-lat&lng geo1)
     (receive (lat2 long2) (coerce-lat&lng geo2)
       (hubeny-distance* lat1 long1 lat2 long2))))
@@ -169,13 +170,13 @@
 
 ;; ## This interface still testing
 ;; - METER : <number>
-;; - GEO : <string>
+;; - GEO : <string> | (LAT:<number> LNG:<number>)
 ;; -> [LAT:<number> LNG:<number>]
 (define (hubeny-limit meter geo)
   (assume-type meter <number>)
   (assume-type geo <string>)
 
-  (receive (lat long) (parse-lat/long geo)
+  (receive (lat long) (coerce-lat&lng geo)
     (hubeny-limit* meter lat long)))
 
 ;; ## This interface still testing
@@ -227,20 +228,26 @@
 ;; ## This interface still testing
 ;; Utility proceure min&max range of latitude
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
-(define (hubeny-lat-range meter lat lng)
+(define (hubeny-lat-range* meter lat lng)
   (let1 yDegree (hubeny-lat-limit meter lat)
     (values (- lat yDegree) (+ lat yDegree))))
 
 ;; ## This interface still testing
 ;; Utility proceure min&max range of longitude
 ;; -> [LNG-MIN:<number> LNG-MAX:<number>]
-(define (hubeny-lng-range meter lat lng)
+(define (hubeny-lng-range* meter lat lng)
   (let1 xDegree (hubeny-lng-limit meter lat)
     (values (- lng xDegree) (+ lng xDegree))))
 
 ;; ## This interface still testing
 ;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
-(define (hubeny-range meter lat lng)
+(define (hubeny-range meter geo)
+  (receive (lat lng) (coerce-lat&lng geo)
+    (hubeny-range* meter lat lng)))
+
+;; ## This interface still testing
+;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
+(define (hubeny-range* meter lat lng)
   (let ([yDegree (hubeny-lat-limit meter lat)]
         [xDegree (hubeny-lng-limit meter lat)])
     (values (- lat yDegree) (+ lat yDegree)
