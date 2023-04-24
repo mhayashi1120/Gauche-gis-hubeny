@@ -11,7 +11,8 @@
    hubeny-limit hubeny-limit*
    hubeny-lat-limit hubeny-lng-limit
    hubeny-lat-range* hubeny-lng-range*
-   hubeny-range hubeny-range*)
+   hubeny-range hubeny-range*
+   hubeny-in-rectangle?)
   ;; Deprecating interface
   (export
    ;; Method
@@ -25,6 +26,10 @@
 
 (define (radian->degree radian)
   (* radian 180/pi))
+
+;; # TODO:
+;; - improve *-range interface. at polar regions
+
 
 ;; http://yamadarake.jp/trdi/report000001.html
 
@@ -139,8 +144,11 @@
 ;;; # API
 ;;;
 
+;; ## <GEO>
+;; <GEO>   ::= <string> | (LAT:<number . LNG:<number>)
+
 ;; ##
-;; - {GEO1, GEO2} : <string> | (LAT:<number . LNG:<number>)
+;; - {GEO1, GEO2} : <GEO>
 ;;       (e.g. "36.1030203, 139.40202" (36.1030203 . 139.40202))
 ;; -> <number>
 (define (hubeny-distance geo1 geo2)
@@ -170,7 +178,7 @@
 
 ;; ## This interface still testing
 ;; - METER : <number>
-;; - GEO : <string> | (LAT:<number> LNG:<number>)
+;; - GEO : <GEO>
 ;; -> [LAT:<number> LNG:<number>]
 (define (hubeny-limit meter geo)
   (assume-type meter <number>)
@@ -224,46 +232,52 @@
 ;;
 ;; use min_latitude、max_latitude、min_longitude、max_longitude as argument.
 
-;; TODO improve range interface. at polar regions
-
-;; ## This interface still testing
-;; Utility proceure min&max range of latitude
+;; ## Utility to get Min&Max of latitude
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
 (define (hubeny-lat-range meter geo)
   (receive (lat lng) (coerce-lat&lng geo)
     (hubeny-lat-range* meter lat lng)))
 
-;; ## This interface still testing
-;; Utility proceure min&max range of longitude
+;; ## Utility to get Min&Max of longitude
 ;; -> [LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-lng-range meter geo)
   (receive (lat lng) (coerce-lat&lng geo)
     (hubeny-lng-range* meter lat lng)))
 
-;; ## This interface still testing
-;; Utility proceure min&max range of latitude
+;; ## Utility to get Min&Max of latitude
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
 (define (hubeny-lat-range* meter lat lng)
   (let1 yDegree (hubeny-lat-limit meter lat)
     (values (- lat yDegree) (+ lat yDegree))))
 
-;; ## This interface still testing
-;; Utility proceure min&max range of longitude
+;; ## Utility to get Min&Max of longitude
 ;; -> [LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-lng-range* meter lat lng)
   (let1 xDegree (hubeny-lng-limit meter lat)
     (values (- lng xDegree) (+ lng xDegree))))
 
-;; ## This interface still testing
+;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
 ;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-range meter geo)
   (receive (lat lng) (coerce-lat&lng geo)
     (hubeny-range* meter lat lng)))
 
-;; ## This interface still testing
+;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
 ;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-range* meter lat lng)
   (let ([yDegree (hubeny-lat-limit meter lat)]
         [xDegree (hubeny-lng-limit meter lat)])
     (values (- lat yDegree) (+ lat yDegree)
             (- lng xDegree) (+ lng xDegree))))
+
+;; ## Utility function combination of [=hubeny-range]() and pred
+;; - GEO : <GEO>
+;; - METER : <number>
+;; - CENTER-GEO : <GEO>
+;; -> <boolean>
+(define (hubeny-in-rectangle? geo meter center-geo)
+  (receive (min-lat max-lat min-lng max-lng)
+      (hubeny-range meter center-geo)
+    (receive (lat lng) (coerce-lat&lng geo)
+      (and (<= min-lat lat max-lat)
+           (<= min-lng lng max-lng)))))

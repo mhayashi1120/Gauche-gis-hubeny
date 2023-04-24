@@ -61,6 +61,25 @@
   (test* "Distance from Google Map 2"
          2255100.0 (hubeny-distance "4.741940, 15.557547" "-11.450795, 3.284581") nearly=?))
 
+(let ([富士山 "35.3606447,138.727583"]
+      [浅間大社奥宮 (cons 35.365681 138.732884)]
+      [迎久須志神社 (cons 35.366972 138.735178)])
+  (test* "Distance between 富士山の御鉢"
+         740 (hubeny-distance 浅間大社奥宮 富士山) nearly=?)
+
+  (receive (min-lat max-lat min-lng max-lng) (hubeny-range 750 富士山)
+    (let ([lat (car 浅間大社奥宮)]
+          [lng (cdr 浅間大社奥宮)])
+      (test* "浅間大社 is in distance"
+             #t (and (<= min-lat lat max-lat)
+                     (<= min-lng lng max-lng))))
+
+    (test* "迎久須志神社 is out of distance"
+           #t (hubeny-in-rectangle?  迎久須志神社 750 富士山))
+    )
+  )
+
+
 ;; TODO more test. between NorthEast and SouceWest
 
 (test-end :exit-on-failure #t)
