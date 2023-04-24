@@ -228,7 +228,6 @@
 ;; # *-range API
 ;;
 ;; Like [Google Streetview publishapi](https://developers.google.com/streetview/publish/reference/rest/v1/photos/list?hl=ja)
-;;
 ;; use min_latitude, max_latitude, min_longitude, max_longitude as argument.
 
 ;; ## Utility to get Min&Max of latitude
