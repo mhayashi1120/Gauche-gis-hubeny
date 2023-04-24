@@ -67,16 +67,22 @@
   (test* "Distance between 富士山の御鉢"
          740 (hubeny-distance 浅間大社奥宮 富士山) nearly=?)
 
-  (receive (min-lat max-lat min-lng max-lng) (hubeny-range 750 富士山)
+  ;; Use 745m here to adjust precision error.
+  (receive (min-lat max-lat min-lng max-lng) (hubeny-range 745 富士山)
     (let ([lat (car 浅間大社奥宮)]
           [lng (cdr 浅間大社奥宮)])
       (test* "浅間大社 is in distance"
              #t (and (<= min-lat lat max-lat)
-                     (<= min-lng lng max-lng))))
+                     (<= min-lng lng max-lng)))))
 
-    (test* "迎久須志神社 is out of distance"
-           #t (hubeny-in-rectangle?  迎久須志神社 750 富士山))
-    )
+  ;; 迎久須志神社 is on diagonal line lat (X) & lng (Y)
+  (test* "迎久須志神社 is in distance"
+         #t (hubeny-in-rectangle?  迎久須志神社 745 富士山))
+
+  ;; Use 500m here
+  (test* "迎久須志神社 is out of distance"
+         #f (hubeny-in-rectangle?  迎久須志神社 500 富士山))
+
   )
 
 

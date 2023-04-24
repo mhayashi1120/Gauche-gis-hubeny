@@ -30,7 +30,6 @@
 ;; # TODO:
 ;; - improve *-range interface. at polar regions
 
-
 ;; http://yamadarake.jp/trdi/report000001.html
 
 ;; d = sqrt( (Dy * M)^2 + (Dx * N * cosμy)^2 )
@@ -176,10 +175,10 @@
 
 ;; Following methods consider to use search range of lat,long set.
 
-;; ## This interface still testing
+;; ## Get lat&lng degree difference
 ;; - METER : <number>
 ;; - GEO : <GEO>
-;; -> [LAT:<number> LNG:<number>]
+;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
 (define (hubeny-limit meter geo)
   (assume-type meter <number>)
   (assume-type geo <string>)
@@ -187,17 +186,17 @@
   (receive (lat long) (coerce-lat&lng geo)
     (hubeny-limit* meter lat long)))
 
-;; ## This interface still testing
+;; ## Get lat&lng degree difference
 ;; See [=hubeny-lat-limit]() and [=hubeny-lng-limit]()
 ;; - METER : <number>
 ;; - LAT : <number>
 ;; - LNG : Deprecating since redundant.
-;; -> [LAT:<number> LNG:<number>]
+;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
 (define (hubeny-limit* meter lat _lng)
   (values (hubeny-lat-limit meter lat)
           (hubeny-lng-limit meter lat)))
 
-;; ## This interface still testing
+;; ## Get latitude degree difference
 ;; - METER : <number>
 ;; - {LAT, LNG} : <number>
 ;; -> LATITUDE*:<number>
@@ -212,7 +211,7 @@
 
     (radian->degree Dy)))
 
-;; ## This interface still testing
+;; ## Get longitude degree difference
 ;; **WARN** Need latitude as an argument. Not longitutde.
 ;; -> LONGITUDE*:<number>
 (define (hubeny-lng-limit meter lat)
@@ -230,7 +229,7 @@
 ;;
 ;; Like [Google Streetview publishapi](https://developers.google.com/streetview/publish/reference/rest/v1/photos/list?hl=ja)
 ;;
-;; use min_latitude、max_latitude、min_longitude、max_longitude as argument.
+;; use min_latitude, max_latitude, min_longitude, max_longitude as argument.
 
 ;; ## Utility to get Min&Max of latitude
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
