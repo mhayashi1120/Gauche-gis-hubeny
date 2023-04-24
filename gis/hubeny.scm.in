@@ -138,7 +138,7 @@
     (match g
       [(? string? s)
        (parse-lat/long s)]
-      [((? integer? lat) . (? integer? lng))
+      [((? number? lat) . (? number? lng))
        (values lat lng)]
       [_
        (error "Not a suported geo" g)]))
@@ -215,6 +215,12 @@
          [Dx (/ (sqrt (- (expt meter 2) (expt (* Dy M) 2))) Ncos)])
 
     (radian->degree Dx)))
+
+;; # *-range API
+;;
+;; Like [Google Streetview publishapi](https://developers.google.com/streetview/publish/reference/rest/v1/photos/list?hl=ja)
+;;
+;; use min_latitude、max_latitude、min_longitude、max_longitude as argument.
 
 ;; TODO improve range interface. at polar regions
 
