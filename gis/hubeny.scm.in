@@ -29,7 +29,7 @@
 
 ;; d = sqrt( (Dy * M)^2 + (Dx * N * cosμy)^2 )
 
-;; d = METRE
+;; d = METER
 ;; ( x1, y1 ) = location1
 ;; ( x2, y2 ) = location2
 ;; Dy = y1 - y2 (diff latitude)
@@ -162,8 +162,8 @@
          [Dx (degree->radian (- lng1 lng2))]
          [DyM (* Dy M)]
          [DxNcos (* Dx Ncos)]
-         [metre (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
-    metre))
+         [meter (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
+    meter))
 
 ;; Following methods consider to use search range of lat,long set.
 
