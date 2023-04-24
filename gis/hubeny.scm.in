@@ -182,9 +182,10 @@
 ;; ## This interface still testing
 ;; See [=hubeny-lat-limit]() and [=hubeny-lng-limit]()
 ;; - METER : <number>
-;; - {LAT, LNG} : <number>
+;; - LAT : <number>
+;; - LNG : Deprecating since redundant.
 ;; -> [LAT:<number> LNG:<number>]
-(define (hubeny-limit* meter lat lng)
+(define (hubeny-limit* meter lat _lng)
   (values (hubeny-lat-limit meter lat)
           (hubeny-lng-limit meter lat)))
 
