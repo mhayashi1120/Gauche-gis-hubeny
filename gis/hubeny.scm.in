@@ -228,6 +228,20 @@
 ;; ## This interface still testing
 ;; Utility proceure min&max range of latitude
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
+(define (hubeny-lat-range meter geo)
+  (receive (lat lng) (coerce-lat&lng geo)
+    (hubeny-lat-range* meter lat lng)))
+
+;; ## This interface still testing
+;; Utility proceure min&max range of longitude
+;; -> [LNG-MIN:<number> LNG-MAX:<number>]
+(define (hubeny-lng-range meter geo)
+  (receive (lat lng) (coerce-lat&lng geo)
+    (hubeny-lng-range* meter lat lng)))
+
+;; ## This interface still testing
+;; Utility proceure min&max range of latitude
+;; -> [LAT-MIN:<number> LAT-MAX:<number>]
 (define (hubeny-lat-range* meter lat lng)
   (let1 yDegree (hubeny-lat-limit meter lat)
     (values (- lat yDegree) (+ lat yDegree))))
