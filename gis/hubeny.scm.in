@@ -183,8 +183,8 @@
   (assume-type meter <number>)
   (assume-type geo <string>)
 
-  (receive (lat long) (coerce-lat&lng geo)
-    (hubeny-limit* meter lat long)))
+  (receive (lat _) (coerce-lat&lng geo)
+    (hubeny-limit* meter lat)))
 
 ;; ## Get lat&lng degree difference
 ;; See [=hubeny-lat-limit]() and [=hubeny-lng-limit]()
@@ -192,7 +192,7 @@
 ;; - LAT : <number>
 ;; - LNG : Deprecating since redundant.
 ;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
-(define (hubeny-limit* meter lat _lng)
+(define (hubeny-limit* meter lat :optional (_lng #f))
   (values (hubeny-lat-limit meter lat)
           (hubeny-lng-limit meter lat)))
 
