@@ -83,10 +83,20 @@
          [Ncos (* N (cos MUy))])
     (values M Ncos)))
 
+;; Maybe its enough about polar region.
+(define (clamp-lat lat*)
+  (assume-type lat* <number>)
+  (clamp -90 lat* 90))
+
+(define (clamp-lng lng*)
+  (assume-type lng* <number>)
+  (- (mod (+ lng* 180) 360) 180))
+
 (define (parse-lat/long s)
   (cond
-   [(#/^([-+]?[0-9.]+)[\s\t]*,[\s\t]*([-+]?[0-9.]+)$/ s) =>
-    (^m (values (string->number (m 1)) (string->number (m 2))))]
+   [(#/^[\s\t]*([-+]?[0-9.]+)[\s\t]*,[\s\t]*([-+]?[0-9.]+)[\s\t]*$/ s) =>
+    (^m (values (clamp-lat (string->number (m 1)))
+                (clamp-lng (string->number (m 2)))))]
    [else
     (errorf "Not matched ~a" s)]))
 
@@ -246,13 +256,15 @@
 ;; -> [LAT-MIN:<number> LAT-MAX:<number>]
 (define (hubeny-lat-range* meter lat lng)
   (let1 yDegree (hubeny-lat-limit meter lat)
-    (values (- lat yDegree) (+ lat yDegree))))
+    (values (clamp-lat (- lat yDegree))
+            (clamp-lat (+ lat yDegree)))))
 
 ;; ## Utility to get Min&Max of longitude
 ;; -> [LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-lng-range* meter lat lng)
   (let1 xDegree (hubeny-lng-limit meter lat)
-    (values (- lng xDegree) (+ lng xDegree))))
+    (values (clamp-lng (- lng xDegree))
+            (clamp-lng (+ lng xDegree)))))
 
 ;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
 ;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
@@ -263,10 +275,9 @@
 ;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
 ;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
 (define (hubeny-range* meter lat lng)
-  (let ([yDegree (hubeny-lat-limit meter lat)]
-        [xDegree (hubeny-lng-limit meter lat)])
-    (values (- lat yDegree) (+ lat yDegree)
-            (- lng xDegree) (+ lng xDegree))))
+  (let-values ([(lat-min lat-max) (hubeny-lat-range* meter lat lng)]
+               [(lng-min lng-max) (hubeny-lng-range* meter lat lng)])
+    (values lat-min lat-max lng-min lng-max)))
 
 ;; ## Utility function combination of [=hubeny-range]() and pred
 ;; - GEO : <GEO>
