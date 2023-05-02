@@ -85,11 +85,24 @@
 
   )
 
+;; about 8.27km by google map
+(let ([Empire-State-Building "40.748818, -73.98574"]
+      [Statue-Of-Liberty "40.689326, -74.044541"])
+  (test* "Distance between in  New York"
+         8270 (hubeny-distance Empire-State-Building Statue-Of-Liberty) nearly=?))
+
+;; Beyond international dateline in a coutry
+;; "Wellington Zoo (New zealand)"
+;; "Don pollo Lake (New zealand)"
+(let ([Wellington-Zoo "-41.3200854,174.7831047"]
+      [Don-pollo-Lake "-43.8116059,-176.6013737"]
+      )
+  ;; -> about 758.7km by google map
+  (test* "Distance between in New zealand"
+         758700 (hubeny-distance Wellington-Zoo Don-pollo-Lake) nearly=?)
+  )
 
 ;; TODO more test. between NorthEast and SouceWest
-
-;; "Wellington Zoo" -41.3200854,174.7831047
-;; "Don pollo Lake" -43.8116059,-176.6013737
-;; -> 758.7km by google map
+;; Large size compution of hubeny have large size error.
 
 (test-end :exit-on-failure #t)

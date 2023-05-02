@@ -171,13 +171,20 @@
 (define (hubeny-distance* lat1 lng1 lat2 lng2)
   (define-values (M Ncos) (compute-ellipse (/ (+ lat1 lat2) 2.0)))
 
+  (define (subtract-lng lng1 lng2)
+    (let* ([v (- lng1 lng2)]
+           [v* (abs v)])
+      (if (< 180 v*)
+        (- 360 v*)
+        v)))
+
   (assume-type lat1 <number>)
   (assume-type lng1 <number>)
   (assume-type lat2 <number>)
   (assume-type lng2 <number>)
 
   (let* ([Dy (degree->radian (- lat1 lat2))]
-         [Dx (degree->radian (- lng1 lng2))]
+         [Dx (degree->radian (subtract-lng lng1 lng2))]
          [DyM (* Dy M)]
          [DxNcos (* Dx Ncos)]
          [meter (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
