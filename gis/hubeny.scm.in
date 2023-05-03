@@ -8,8 +8,9 @@
    )
   (export
    hubeny-distance hubeny-distance*
-   hubeny-limit hubeny-limit*
    hubeny-lat-limit hubeny-lng-limit
+   hubeny-limit hubeny-limit*
+
    hubeny-lat-range* hubeny-lng-range*
    hubeny-range hubeny-range*
    hubeny-in-rectangle?)
@@ -192,27 +193,6 @@
 
 ;; Following methods consider to use search range of lat,long set.
 
-;; ## Get lat&lng degree difference
-;; - METER : <number>
-;; - GEO : <GEO>
-;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
-(define (hubeny-limit meter geo)
-  (assume-type meter <number>)
-  (assume-type geo <string>)
-
-  (receive (lat _) (coerce-lat&lng geo)
-    (hubeny-limit* meter lat)))
-
-;; ## Get lat&lng degree difference
-;; See [=hubeny-lat-limit]() and [=hubeny-lng-limit]()
-;; - METER : <number>
-;; - LAT : <number>
-;; - LNG : Deprecating since redundant.
-;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
-(define (hubeny-limit* meter lat :optional (_lng #f))
-  (values (hubeny-lat-limit meter lat)
-          (hubeny-lng-limit meter lat)))
-
 ;; ## Get latitude degree difference
 ;; - METER : <number>
 ;; - {LAT, LNG} : <number>
@@ -241,6 +221,27 @@
          [Dx (/ (sqrt (- (expt meter 2) (expt (* Dy M) 2))) Ncos)])
 
     (radian->degree Dx)))
+
+;; ## Get lat&lng degree difference
+;; - METER : <number>
+;; - GEO : <GEO>
+;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
+(define (hubeny-limit meter geo)
+  (assume-type meter <number>)
+  (assume-type geo <string>)
+
+  (receive (lat _) (coerce-lat&lng geo)
+    (hubeny-limit* meter lat)))
+
+;; ## Get lat&lng degree difference
+;; See [=hubeny-lat-limit]() and [=hubeny-lng-limit]()
+;; - METER : <number>
+;; - LAT : <number>
+;; - LNG : Deprecating since redundant.
+;; -> [LAT-DEGREE:<number> LNG-DIGREE:<number>]
+(define (hubeny-limit* meter lat :optional (_lng #f))
+  (values (hubeny-lat-limit meter lat)
+          (hubeny-lng-limit meter lat)))
 
 ;; # *-range API
 ;;
@@ -286,6 +287,11 @@
 
 ;; ## Inverse of [=hubeny-distance*]()
 ;; Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
+;; NOTE:
+;; Distance is calculated in the positive and negative directions of latitude
+;; and longitude, respectively. Thus, the distance on the diagonal is
+;; approximately (* (sqrt 2) METER), so the coordinates within the rectangle
+;; are approximately METER multiplied by 1.0 to 1.4.
 ;; -> <RECT-RANGE>
 (define (hubeny-range* meter lat lng)
   (let-values ([(lat-min lat-max) (hubeny-lat-range* meter lat lng)]

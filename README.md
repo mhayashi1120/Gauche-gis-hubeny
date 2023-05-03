@@ -24,6 +24,9 @@ Other ref:
 
 gis.hubeny
 
+This module is not intended to measure exact distances. Errors are larger when large values are
+passed, such as when the distance exceeds 1000 km.
+
 ## Function
 
 [Procedure] hubeny-distance geo1 geo2
@@ -38,4 +41,15 @@ or lat lng pair
 
 lat and lng is a \<real> value
   
+
+[Procedure] hubeny-range meter geo
+
+Inverse of `hubeny-distance` procedure.
+
+Distance is calculated in the positive and negative directions of latitude
+and longitude, respectively. Thus, the distance on the diagonal is
+approximately (* (sqrt 2) METER), so the coordinates within the rectangle
+are approximately METER multiplied by 1.0 to 1.4.
+
+
 
