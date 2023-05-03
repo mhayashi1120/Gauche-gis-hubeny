@@ -273,14 +273,20 @@
     (values (clamp-lng (- lng xDegree))
             (clamp-lng (+ lng xDegree)))))
 
-;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
-;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
+;; ## <RECT-RANGE>
+;;
+;; <RECT-RANGE>  ::= [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
+
+;; ## Inverse of [=hubeny-distance]()
+;; Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
+;; -> <RECT-RANGE>
 (define (hubeny-range meter geo)
   (receive (lat lng) (coerce-lat&lng geo)
     (hubeny-range* meter lat lng)))
 
-;; ## Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
-;; -> [LAT-MIN:<number> LAT-MAX:<number> LNG-MIN:<number> LNG-MAX:<number>]
+;; ## Inverse of [=hubeny-distance*]()
+;; Combination of [=hubeny-lat-range]() and [=hubeny-lng-range]()
+;; -> <RECT-RANGE>
 (define (hubeny-range* meter lat lng)
   (let-values ([(lat-min lat-max) (hubeny-lat-range* meter lat lng)]
                [(lng-min lng-max) (hubeny-lng-range* meter lat lng)])
