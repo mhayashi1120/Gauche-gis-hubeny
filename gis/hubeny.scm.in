@@ -8,6 +8,7 @@
    )
   (export
    hubeny-distance hubeny-distance*
+   hubeny-diff-lat hubeny-diff-lng
    hubeny-lat-limit hubeny-lng-limit
    hubeny-limit hubeny-limit*
 
@@ -74,9 +75,12 @@
 	       ['WGS84 WGS84_CONSTANTS])))
 
 (define (compute-ellipse lat)
+  ($ compute-ellipse/rad $ degree->radian lat))
+
+(define (compute-ellipse/rad lat/rad)
   (define-values (a e^2 M-num) (define-constants 'WGS84))
 
-  (let* ([MUy (degree->radian lat)]
+  (let* ([MUy lat/rad]
          [sinMUy^2 (expt (sin MUy) 2)]
          [W (sqrt (- 1.0 (* e^2 sinMUy^2)))]
          [M (/ M-num (expt W 3))]
@@ -193,34 +197,51 @@
 
 ;; Following methods consider to use search range of lat,long set.
 
-;; ## Get latitude degree difference
+;; ## Get latitude METER limit as radian
 ;; - METER : <number>
-;; - {LAT, LNG} : <number>
-;; -> LATITUDE*:<number>
-(define (hubeny-lat-limit meter lat)
-  (define-values (M Ncos) (compute-ellipse lat))
+;; - LAT/RAD : <real> radian of latitude
+;; -> Y-RADIAN:<real>
+(define (hubeny-diff-lat meter lat/rad)
+  (define-values (M Ncos) (compute-ellipse/rad lat/rad))
 
   (assume-type meter <number>)
-  (assume-type lat <number>)
+  (assume-type lat/rad <real>)
 
   (let* ([Dx 0.0]
          [Dy (/ (sqrt (-  (expt meter 2) (expt (* Dx Ncos) 2))) M)])
+    Dy))
 
-    (radian->degree Dy)))
-
-;; ## Get longitude degree difference
+;; ## Get longitude METER limit as radian
 ;; **WARN** Need latitude as an argument. Not longitutde.
-;; -> LONGITUDE*:<number>
-(define (hubeny-lng-limit meter lat)
-  (define-values (M Ncos) (compute-ellipse lat))
+;; - METER : <number>
+;; - LAT/RAD : <real> radian of latitude
+;; -> X-RADIAN:<real>
+(define (hubeny-diff-lng meter lat/rad)
+  (define-values (M Ncos) (compute-ellipse/rad lat/rad))
 
   (assume-type meter <number>)
-  (assume-type lat <number>)
+  (assume-type lat/rad <real>)
 
   (let* ([Dy 0.0]
          [Dx (/ (sqrt (- (expt meter 2) (expt (* Dy M) 2))) Ncos)])
+    Dx))
 
-    (radian->degree Dx)))
+;; ## Get latitude METER limit as degree
+;; Wrapper of [=hubeny-diff-lat]()
+;; -> LATITUDE*:<number>
+(define (hubeny-lat-limit meter lat)
+  (let* ([lat/rad (degree->radian lat)]
+         [lat/rad* (hubeny-diff-lat meter lat/rad)])
+    (radian->degree lat/rad*)))
+
+;; ## Get longitude METER limit as degree
+;; **WARN** Need latitude as an argument. Not longitutde.
+;; Wrapper of [=hubeny-diff-lng]()
+;; -> LONGITUDE*:<number>
+(define (hubeny-lng-limit meter lat)
+  (let* ([lat/rad (degree->radian lat)]
+         [lng/rad (hubeny-diff-lng meter lat/rad)])
+    (radian->degree lng/rad)))
 
 ;; ## Get lat&lng degree difference
 ;; - METER : <number>
