@@ -195,7 +195,7 @@
          [meter (sqrt (+ (expt DyM 2) (expt DxNcos 2)))])
     meter))
 
-;; Following methods consider to use search range of lat,long set.
+;; Following methods consider to use search range by distance (meter) of lat,long set.
 
 ;; ## Get latitude METER limit as radian
 ;; - METER : <number>
