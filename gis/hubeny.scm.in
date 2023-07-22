@@ -31,6 +31,7 @@
 
 ;; # TODO:
 ;; - improve *-range interface. at polar regions
+;; - should change degree->radian, radian->degree to Gauche core method
 
 ;; http://yamadarake.jp/trdi/report000001.html
 
