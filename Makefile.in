@@ -42,14 +42,16 @@ GAUCHE_PKGARCHDIR = "$(DESTDIR)@GAUCHE_PKGARCHDIR@"
 
 gis_hubeny_SRCS =
 
+TEST_LOG := test.log
+
 all : $(TARGET)
 
 gis/hubeny.scm:
 	$(MAKE) -C gis all
 
 check : all
-	@rm -f test.log
-	$(GOSH) -I$(srcdir) $(srcdir)/test.scm > test.log
+	@rm -f $(TEST_LOG)
+	$(GOSH) -I$(srcdir) $(srcdir)/test.scm > $(TEST_LOG)
 
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)
@@ -65,7 +67,7 @@ uninstall :
 
 clean :
 	$(GAUCHE_PACKAGE) compile --clean gis_hubeny $(gis_hubeny_SRCS)
-	rm -rf core $(TARGET) $(CONFIG_GENERATED) *~ test.log so_locations
+	rm -rf core $(TARGET) $(CONFIG_GENERATED) *~ $(TEST_LOG) so_locations
 
 distclean : clean
 	rm -rf $(CONFIG_GENERATED)
@@ -73,3 +75,7 @@ distclean : clean
 maintainer-clean : clean
 	rm -f $(GENERATED_SCMFILES)
 	rm -rf $(CONFIG_GENERATED)  VERSION
+
+validate :
+	@echo "Testing current setup"
+	$(GOSH) $(srcdir)/test.scm >> $(TEST_LOG)
