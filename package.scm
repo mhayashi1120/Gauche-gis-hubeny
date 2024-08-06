@@ -4,7 +4,7 @@
 
 (define-gauche-package "Gauche-gis-hubeny"
   ;;
-  :version "1.5.3"
+  :version "1.5.4"
 
   ;; Description of the package.  The first line is used as a short
   ;; summary.

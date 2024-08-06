@@ -71,9 +71,9 @@
 (define (define-constants type)
   (apply values
          (ecase type
-	       ['BESSEL BESSEL_CONSTANTS]
-	       ['GRS80 GRS80_CONSTANTS]
-	       ['WGS84 WGS84_CONSTANTS])))
+	         [(BESSEL) BESSEL_CONSTANTS]
+	         [(GRS80) GRS80_CONSTANTS]
+	         [(WGS84) WGS84_CONSTANTS])))
 
 (define (compute-ellipse lat)
   ($ compute-ellipse/rad $ degree->radian lat))
